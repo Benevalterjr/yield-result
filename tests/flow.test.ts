@@ -75,7 +75,27 @@ describe("safe.sync", () => {
       });
     }).toThrow(/missing asterisk/);
   });
+
+  it("automatically infers unions of different error types across steps", () => {
+    type ErrorA = { kind: "A"; msg: string };
+    type ErrorB = { kind: "B"; code: number };
+
+    const step1 = (): Result<number, ErrorA> => ok(10);
+    const step2 = (): Result<boolean, ErrorB> => ok(true);
+
+    const result = safe.sync(function* () {
+      const a = yield* step1();
+      const b = yield* step2();
+      return { a, b };
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value).toEqual({ a: 10, b: true });
+    }
+  });
 });
+
 
 describe("safe.async", () => {
   const fetchUser = (id: number): Promise<Result<{ age: number }, string>> =>

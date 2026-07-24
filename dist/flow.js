@@ -6,6 +6,7 @@ export const safe = {
     /**
      * Evaluates a synchronous generator function, returning Ok(value) on completion,
      * or short-circuiting on the first yielded Err(error).
+     * Automatically infers and unifies error types yielded across all steps.
      */
     sync: (fn) => {
         let gen;
@@ -56,6 +57,7 @@ export const safe = {
     /**
      * Evaluates an async generator function, returning Ok(value) on completion,
      * or short-circuiting on the first yielded Err(error).
+     * Automatically infers and unifies error types yielded across all steps.
      */
     async: async (fn) => {
         let gen;
