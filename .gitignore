@@ -11,6 +11,3 @@ Thumbs.db
 *.log
 npm-debug.log*
 
-# Gemini / CLI artifacts
-.gemini/
-.system_generated/
