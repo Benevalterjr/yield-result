@@ -1,6 +1,6 @@
 {
   "name": "yield-result",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Rust-style ? operator for TypeScript using generators (yield*). Zero dependencies, type-safe error handling.",
   "type": "module",
   "sideEffects": false,
@@ -47,9 +47,8 @@
   ],
   "license": "MIT",
   "devDependencies": {
+    "neverthrow": "^8.2.0",
     "typescript": "^5.5.4",
     "vitest": "^2.0.5"
   }
 }
-
-

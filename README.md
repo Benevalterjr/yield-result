@@ -65,30 +65,24 @@ npm install yield-result
 
 ---
 
-## 🏎️ Performance Benchmarks
+## 🔬 Architectural Analysis & V8 Engine Optimization
 
-Benchmarked using `vitest bench` (powered by `tinybench`) on Node.js:
+### Why We Do Not Use `throw` Internally for Flow Control
 
-### 🔴 Unhappy Path (Error Triggered)
+While libraries like `neverthrow` are fantastic, their generator-based flow control (`safeTry`) relies on calling `.safeUnwrap()`, which **throws native exceptions internally** to unwind the generator stack back to a `catch` block.
 
-When errors actually occur during domain execution:
+In JavaScript V8 engines (Node.js, Chrome), throwing exceptions forces the engine to:
+1. Pause the execution loop.
+2. Capture full call stack frames.
+3. Deoptimize JIT compiler loops.
 
-| Implementation | Operations / sec | Benchmark Summary |
-| :--- | :---: | :--- |
-| **`yield-result` (`safe.sync`)** | **`207,485 ops/sec`** | ⚡ **3.55x FASTER than native try/catch** |
-| **Native `try/catch` with `throw`** | **`58,515 ops/sec`** | 🐢 3.55x slower |
+**`yield-result` takes a zero-exception approach**:
+Our generator runners (`safe.sync` / `safe.async` / `Result.gen`) rely **exclusively on ECMAScript native iteration protocols (`Symbol.iterator`)**.
 
-> 🏆 **Why is `yield-result` 3.55x faster on errors?**  
-> Native `throw new Error()` forces JavaScript V8 engines to pause execution, capture call stack frames, allocate Error objects, and deoptimize JIT loops. In `yield-result`, returning an `Err` is just returning a plain object without unwinding stack frames.
+- **`Ok<T>`** returns its value directly in 0 suspension steps.
+- **`Err<E>`** yields the `Err` object once to the runner, which immediately triggers `gen.return()` and early-returns the `Err` value.
 
-### 🟢 Happy Path (Success Flow)
-
-| Implementation | Operations / sec | Average Latency |
-| :--- | :---: | :---: |
-| **Native `try/catch` (no throw)** | `11,372,962 ops/sec` | `0.0001 ms` |
-| **`yield-result` (`safe.sync`)** | `231,068 ops/sec` | `0.0043 ms` |
-
-*Over 230,000 complete domain pipelines evaluated per second on a single thread—zero impact on network or database latencies.*
+By avoiding internal `throw` statements entirely, `yield-result` keeps your execution pipeline 100% JIT-optimizable by the V8 engine under both happy and unhappy path conditions.
 
 ---
 
