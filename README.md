@@ -45,6 +45,16 @@ const processOrder = (id: string) => safe.async(async function* () {
 });
 ```
 
+### 🎓 How `yield*` Works Under the Hood (Didactic Guide)
+
+Many JavaScript developers assume generators are complex, but in `yield-result`, generator delegation (**`yield*`**) is simply a **native protocol for unwrapping values**:
+
+1. **`Ok<T>` Protocol**: Implements `[Symbol.iterator]` to return `value` immediately without yielding anything. Therefore, `const x = yield* ok(10)` assigns `10` directly to `x` in 0 suspension steps.
+2. **`Err<E>` Protocol**: Implements `[Symbol.iterator]` to `yield` the `Err` instance once back to `safe.sync` / `safe.async`.
+3. **Short-Circuiting**: The runner (`safe.sync`) receives the `Err` object, immediately calls `gen.return()` (triggering any `try ... finally` cleanup in your function), and early-returns `err(E)`.
+
+No exception throwing, no stack unwinding, 100% native ECMAScript iteration semantics.
+
 ---
 
 ## 🚀 Installation
@@ -281,10 +291,12 @@ safe.sync(function* () {
 * **`safe.sync(function* () { ... })`** / **`Result.gen(function* () { ... })`** — Executes a synchronous generator function with early-return short-circuiting on `Err`.
 * **`safe.async(async function* () { ... })`** / **`Result.gen.async(async function* () { ... })`** — Executes an async generator function with early-return short-circuiting on `Err`.
 
-### Exception Wrappers
+### Exception Wrappers & Function Lifting
 * **`fromThrowable(fn, errorMapper?)`** — Wraps a throwing function into a `Result<T, E>`.
 * **`fromPromise(promise, errorMapper?)`** — Wraps a Promise into `Promise<Result<T, E>>`.
 * **`fromAsyncFn(fn, errorMapper?)`** — Wraps an async function into `Promise<Result<T, E>>`.
+* **`lift(fn, errorMapper?)`** — Lifts a sync throwing function `(...args) => T` into a Result function `(...args) => Result<T, E>`.
+* **`liftAsync(fn, errorMapper?)`** — Lifts an async function `(...args) => Promise<T>` into a Promise<Result> function `(...args) => Promise<Result<T, E>>`.
 
 ### Combinators & Utilities
 * **`map(result, fn)`** — Transforms the `Ok` value.

@@ -46,5 +46,22 @@ export const fromAsyncFn = async <T, E = unknown>(
     return err(errorMapper ? errorMapper(e) : (e as E));
   }
 };
+/**
+ * Lifts a standard synchronous function that may throw into a Result-returning function.
+ */
+export const lift = <A extends any[], T, E = unknown>(
+  fn: (...args: A) => T,
+  errorMapper?: (e: unknown) => E
+): ((...args: A) => Result<T, E>) => {
+  return (...args: A) => fromThrowable(() => fn(...args), errorMapper);
+};
 
-
+/**
+ * Lifts an asynchronous function returning a Promise into a Promise<Result<T, E>> function.
+ */
+export const liftAsync = <A extends any[], T, E = unknown>(
+  fn: (...args: A) => Promise<T>,
+  errorMapper?: (e: unknown) => E
+): ((...args: A) => Promise<Result<T, E>>) => {
+  return (...args: A) => fromAsyncFn(() => fn(...args), errorMapper);
+};
