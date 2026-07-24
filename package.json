@@ -25,6 +25,14 @@
     "bench": "npx vitest bench",
     "prepublishOnly": "npm run test && npm run test:types && npm run build"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Benevalterjr/yield-result.git"
+  },
+  "homepage": "https://github.com/Benevalterjr/yield-result#readme",
+  "bugs": {
+    "url": "https://github.com/Benevalterjr/yield-result/issues"
+  },
   "keywords": [
     "result",
     "error-handling",
@@ -42,4 +50,5 @@
     "vitest": "^2.0.5"
   }
 }
+
 
