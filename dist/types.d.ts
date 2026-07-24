@@ -88,6 +88,16 @@ export declare const partition: <T, E>(results: Result<T, E>[]) => {
     errors: E[];
 };
 /**
+ * Interface representing a discriminated error object with a `_tag` property.
+ */
+export interface TaggedError<T extends string> {
+    readonly _tag: T;
+}
+/**
+ * Creates an immutable TaggedError object with a `_tag` property and optional payload properties.
+ */
+export declare const taggedError: <T extends string, P extends Record<string, unknown> = {}>(tag: T, props?: P) => Readonly<TaggedError<T> & P>;
+/**
  * Namespace object grouping all Result constructors, guards, and combinators.
  */
 export declare const Result: {
@@ -112,4 +122,5 @@ export declare const Result: {
         values: T[];
         errors: E[];
     };
+    readonly taggedError: <T extends string, P extends Record<string, unknown> = {}>(tag: T, props?: P) => Readonly<TaggedError<T> & P>;
 };

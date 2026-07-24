@@ -134,6 +134,13 @@ export const partition = (results) => {
     return { values, errors };
 };
 /**
+ * Creates an immutable TaggedError object with a `_tag` property and optional payload properties.
+ */
+export const taggedError = (tag, props) => Object.freeze({
+    _tag: tag,
+    ...(props ?? {}),
+});
+/**
  * Namespace object grouping all Result constructors, guards, and combinators.
  */
 export const Result = {
@@ -152,4 +159,5 @@ export const Result = {
     match,
     all,
     partition,
+    taggedError,
 };

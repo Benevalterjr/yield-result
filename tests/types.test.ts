@@ -16,6 +16,7 @@ import {
   all,
   partition,
   Result,
+  taggedError,
 } from "../src/types.js";
 
 describe("ok/err constructors", () => {
@@ -53,7 +54,15 @@ describe("ok/err constructors", () => {
     expect(Result.isErr(e)).toBe(true);
     expect(Result.unwrap(o)).toBe(10);
   });
+
+  it("creates immutable taggedError objects with _tag discriminator", () => {
+    const NotFoundError = taggedError("NotFoundError", { resourceId: "123" });
+    expect(NotFoundError._tag).toBe("NotFoundError");
+    expect(NotFoundError.resourceId).toBe("123");
+    expect(Object.isFrozen(NotFoundError)).toBe(true);
+  });
 });
+
 
 
 describe("serialization and cloning", () => {

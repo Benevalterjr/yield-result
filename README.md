@@ -131,9 +131,128 @@ const fetchRes = await fromPromise(
 const asyncRes = await fromAsyncFn(() => loadData());
 ```
 
+### 4. Strongly-Typed Errors with `taggedError`
+
+Use `taggedError` to create clean, discriminated error unions with custom payloads:
+
+```typescript
+import { taggedError, err, safe, match } from "yield-result";
+
+// Define domain errors
+const HttpError = (status: number) => taggedError("HttpError", { status });
+const ValidationError = (field: string) => taggedError("ValidationError", { field });
+
+// Functions returning different error types
+const fetchUser = (id: string) => err(HttpError(404));
+const validateAge = (age: number) => err(ValidationError("age"));
+
+// safe.sync automatically infers the error union: Result<User, TaggedError<"HttpError"> | TaggedError<"ValidationError">>
+const result = safe.sync(function* () {
+  const user = yield* fetchUser("123");
+  yield* validateAge(user.age);
+  return user;
+});
+```
+
+---
+
+## 🏷️ Automatic Error Union Inference (`InferYieldErr`)
+
+`yield-result` features automatic error type extraction and union distribution (`InferYieldErr<G>`). When yielding different error types across pipeline steps, TypeScript automatically unifies them without requiring manual type annotations!
+
+### Before vs After
+
+```typescript
+type DbError = { _tag: "DbError"; code: string };
+type ValidationError = { _tag: "ValidationError"; field: string };
+
+const queryUser = (): Result<User, DbError> => ...;
+const validateUser = (u: User): Result<boolean, ValidationError> => ...;
+
+// ❌ BEFORE: Manual generic type parameters required:
+const res = safe.sync<User, DbError | ValidationError>(function* () {
+  const user = yield* queryUser();
+  const valid = yield* validateUser(user);
+  return user;
+});
+
+// ✅ AFTER: 100% AUTOMATIC INFERENCE (Zero type arguments needed!):
+// Automatically inferred as: Result<User, DbError | ValidationError>
+const res = safe.sync(function* () {
+  const user = yield* queryUser();        // Yields Err<DbError>
+  const valid = yield* validateUser(user); // Yields Err<ValidationError>
+  return user;
+});
+```
+
+---
+
+## 🌐 Complete Real-World API Workflow Example
+
+Here is a full end-to-end production API endpoint handler (**Fetch → Validation → DB → HTTP Response**):
+
+```typescript
+import { safe, ok, err, fromPromise, taggedError, match, Result } from "yield-result";
+
+// 1. Define Discriminated Domain Errors
+const ApiError = (status: number, message: string) => taggedError("ApiError", { status, message });
+const DbError = (query: string) => taggedError("DbError", { query });
+const ValidationError = (field: string, reason: string) => taggedError("ValidationError", { field, reason });
+
+type DomainError = 
+  | ReturnType<typeof ApiError>
+  | ReturnType<typeof DbError>
+  | ReturnType<typeof ValidationError>;
+
+// 2. Domain Services
+async function fetchExternalOrder(orderId: string): Promise<Result<{ id: string; amount: number }, DomainError>> {
+  return fromPromise(
+    fetch(`https://api.payments.com/orders/${orderId}`).then(r => r.json()),
+    () => ApiError(502, "External Payment Gateway unreachable")
+  );
+}
+
+function validateOrderAmount(order: { id: string; amount: number }): Result<{ id: string; amount: number }, DomainError> {
+  if (order.amount <= 0) return err(ValidationError("amount", "Order amount must be positive"));
+  return ok(order);
+}
+
+async function saveOrderToDb(order: { id: string; amount: number }): Promise<Result<{ saved: boolean }, DomainError>> {
+  // Simulating DB write
+  return ok({ saved: true });
+}
+
+// 3. Complete Business Pipeline with safe.async
+export async function handleOrderCheckout(orderId: string) {
+  const pipelineResult = await safe.async(async function* () {
+    const rawOrder = yield* await fetchExternalOrder(orderId); // Step 1: External API
+    const validOrder = yield* validateOrderAmount(rawOrder);   // Step 2: Domain Validation
+    const dbRecord = yield* await saveOrderToDb(validOrder);    // Step 3: Database Save
+    
+    return { status: 200, data: { orderId: validOrder.id, dbRecord } };
+  });
+
+  // 4. Exhaustive Pattern Matching for HTTP Response
+  return match(pipelineResult, {
+    ok: (res) => ({ statusCode: 200, body: JSON.stringify(res) }),
+    err: (error) => {
+      switch (error._tag) {
+        case "ApiError":
+          return { statusCode: error.status, body: JSON.stringify({ error: error.message }) };
+        case "ValidationError":
+          return { statusCode: 400, body: JSON.stringify({ error: `Invalid ${error.field}: ${error.reason}` }) };
+        case "DbError":
+          return { statusCode: 500, body: JSON.stringify({ error: "Database transaction failed" }) };
+      }
+    },
+  });
+}
+```
+
 ---
 
 ## 🛡️ Built-in Safety Features
+
 
 ### Runtime Protection against Missing Asterisk (`*`)
 
