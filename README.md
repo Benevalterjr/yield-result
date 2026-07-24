@@ -2,6 +2,8 @@
 
 > Rust-style `?` operator for TypeScript using generators (`yield*`). Zero dependencies, lightweight, type-safe error handling without runtime exceptions.
 
+[![npm version](https://img.shields.io/npm/v/yield-result.svg?style=flat)](https://www.npmjs.com/package/yield-result)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/yield-result.svg)](https://bundlephobia.com/package/yield-result)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5+-blue.svg)](https://www.typescriptlang.org/)
 [![Vitest](https://img.shields.io/badge/tested%20with-vitest-blueviolet.svg)](https://vitest.dev/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
