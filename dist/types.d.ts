@@ -98,7 +98,7 @@ export interface TaggedError<T extends string> {
  */
 export declare const taggedError: <T extends string, P extends Record<string, unknown> = {}>(tag: T, props?: P) => Readonly<TaggedError<T> & P>;
 /**
- * Namespace object grouping all Result constructors, guards, and combinators.
+ * Namespace object grouping all Result constructors, guards, combinators, and generator runners.
  */
 export declare const Result: {
     readonly ok: <T>(value: T) => Ok<T>;
@@ -123,4 +123,8 @@ export declare const Result: {
         errors: E[];
     };
     readonly taggedError: <T extends string, P extends Record<string, unknown> = {}>(tag: T, props?: P) => Readonly<TaggedError<T> & P>;
+    readonly gen: (<G extends Generator<Err<unknown>, unknown, unknown>>(fn: () => G) => Result<G extends Generator<unknown, infer R, unknown> ? R : G extends AsyncGenerator<unknown, infer R_1, unknown> ? R_1 : never, G extends Generator<infer Y, unknown, unknown> ? Y extends Err<infer E> ? E : never : G extends AsyncGenerator<infer Y_1, unknown, unknown> ? Y_1 extends Err<infer E_1> ? E_1 : never : never>) & {
+        sync: <G extends Generator<Err<unknown>, unknown, unknown>>(fn: () => G) => Result<G extends Generator<unknown, infer R, unknown> ? R : G extends AsyncGenerator<unknown, infer R_1, unknown> ? R_1 : never, G extends Generator<infer Y, unknown, unknown> ? Y extends Err<infer E> ? E : never : G extends AsyncGenerator<infer Y_1, unknown, unknown> ? Y_1 extends Err<infer E_1> ? E_1 : never : never>;
+        async: <G extends AsyncGenerator<Err<unknown>, unknown, unknown>>(fn: () => G) => Promise<Result<G extends Generator<unknown, infer R, unknown> ? R : G extends AsyncGenerator<unknown, infer R_1, unknown> ? R_1 : never, G extends Generator<infer Y, unknown, unknown> ? Y extends Err<infer E> ? E : never : G extends AsyncGenerator<infer Y_1, unknown, unknown> ? Y_1 extends Err<infer E_1> ? E_1 : never : never>>;
+    };
 };

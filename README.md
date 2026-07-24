@@ -277,9 +277,9 @@ safe.sync(function* () {
 * **`err(error)`** / **`Result.err(error)`** — Creates an `Err<E>` result.
 * **`isOk(result)`** / **`isErr(result)`** — TypeScript type guards.
 
-### Flow Runners (`safe`)
-* **`safe.sync(function* () { ... })`** — Executes a synchronous generator function with early-return short-circuiting on `Err`.
-* **`safe.async(async function* () { ... })`** — Executes an async generator function with early-return short-circuiting on `Err`.
+### Flow Runners (`safe` & `Result.gen`)
+* **`safe.sync(function* () { ... })`** / **`Result.gen(function* () { ... })`** — Executes a synchronous generator function with early-return short-circuiting on `Err`.
+* **`safe.async(async function* () { ... })`** / **`Result.gen.async(async function* () { ... })`** — Executes an async generator function with early-return short-circuiting on `Err`.
 
 ### Exception Wrappers
 * **`fromThrowable(fn, errorMapper?)`** — Wraps a throwing function into a `Result<T, E>`.

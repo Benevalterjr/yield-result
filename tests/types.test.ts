@@ -61,7 +61,29 @@ describe("ok/err constructors", () => {
     expect(NotFoundError.resourceId).toBe("123");
     expect(Object.isFrozen(NotFoundError)).toBe(true);
   });
+
+  it("supports Result.gen, Result.gen.sync, and Result.gen.async syntactic sugar", async () => {
+    const r1 = Result.gen(function* () {
+      const x = yield* ok(10);
+      const y = yield* ok(20);
+      return x + y;
+    });
+    expect(r1.ok && r1.value).toBe(30);
+
+    const r2 = Result.gen.sync(function* () {
+      const a = yield* ok(5);
+      return a * 2;
+    });
+    expect(r2.ok && r2.value).toBe(10);
+
+    const r3 = await Result.gen.async(async function* () {
+      const a = yield* ok(100);
+      return a / 2;
+    });
+    expect(r3.ok && r3.value).toBe(50);
+  });
 });
+
 
 
 

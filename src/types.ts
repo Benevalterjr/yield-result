@@ -190,8 +190,18 @@ export const taggedError = <T extends string, P extends Record<string, unknown> 
     ...(props ?? {}),
   } as TaggedError<T> & P);
 
+import { safe } from "./flow.js";
+
+const genRunner = Object.assign(
+  <G extends Generator<Err<unknown>, unknown, unknown>>(fn: () => G) => safe.sync(fn),
+  {
+    sync: safe.sync,
+    async: safe.async,
+  }
+);
+
 /**
- * Namespace object grouping all Result constructors, guards, and combinators.
+ * Namespace object grouping all Result constructors, guards, combinators, and generator runners.
  */
 export const Result = {
   ok,
@@ -210,7 +220,9 @@ export const Result = {
   all,
   partition,
   taggedError,
+  gen: genRunner,
 } as const;
+
 
 
 

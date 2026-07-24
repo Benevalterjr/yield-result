@@ -140,8 +140,13 @@ export const taggedError = (tag, props) => Object.freeze({
     _tag: tag,
     ...(props ?? {}),
 });
+import { safe } from "./flow.js";
+const genRunner = Object.assign((fn) => safe.sync(fn), {
+    sync: safe.sync,
+    async: safe.async,
+});
 /**
- * Namespace object grouping all Result constructors, guards, and combinators.
+ * Namespace object grouping all Result constructors, guards, combinators, and generator runners.
  */
 export const Result = {
     ok,
@@ -160,4 +165,5 @@ export const Result = {
     all,
     partition,
     taggedError,
+    gen: genRunner,
 };
