@@ -1,18 +1,18 @@
 import { Result, Err, ok, err, isOk, isErr } from "./types.js";
 
-type InferYieldErr<G> = G extends Generator<infer Y, any, any>
+type InferYieldErr<G> = G extends Generator<infer Y, unknown, unknown>
   ? Y extends Err<infer E>
     ? E
     : never
-  : G extends AsyncGenerator<infer Y, any, any>
+  : G extends AsyncGenerator<infer Y, unknown, unknown>
   ? Y extends Err<infer E>
     ? E
     : never
   : never;
 
-type InferReturn<G> = G extends Generator<any, infer R, any>
+type InferReturn<G> = G extends Generator<unknown, infer R, unknown>
   ? R
-  : G extends AsyncGenerator<any, infer R, any>
+  : G extends AsyncGenerator<unknown, infer R, unknown>
   ? R
   : never;
 
@@ -25,7 +25,7 @@ export const safe = {
    * or short-circuiting on the first yielded Err(error).
    * Automatically infers and unifies error types yielded across all steps.
    */
-  sync: <G extends Generator<Err<any>, any, any>>(
+  sync: <G extends Generator<Err<unknown>, unknown, unknown>>(
     fn: () => G
   ): Result<InferReturn<G>, InferYieldErr<G>> => {
     let gen: G;
@@ -82,7 +82,7 @@ export const safe = {
    * or short-circuiting on the first yielded Err(error).
    * Automatically infers and unifies error types yielded across all steps.
    */
-  async: async <G extends AsyncGenerator<Err<any>, any, any>>(
+  async: async <G extends AsyncGenerator<Err<unknown>, unknown, unknown>>(
     fn: () => G
   ): Promise<Result<InferReturn<G>, InferYieldErr<G>>> => {
     let gen: G;
