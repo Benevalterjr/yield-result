@@ -1,0 +1,45 @@
+{
+  "name": "yield-result",
+  "version": "0.1.0",
+  "description": "Rust-style ? operator for TypeScript using generators (yield*). Zero dependencies, type-safe error handling.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npx vitest run",
+    "test:types": "tsc -p tsconfig.json --noEmit",
+    "bench": "npx vitest bench",
+    "prepublishOnly": "npm run test && npm run test:types && npm run build"
+  },
+  "keywords": [
+    "result",
+    "error-handling",
+    "rust",
+    "generator",
+    "yield",
+    "monad",
+    "typescript",
+    "either",
+    "safe"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}
+
