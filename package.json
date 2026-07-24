@@ -1,6 +1,6 @@
 {
   "name": "yield-result",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Rust-style ? operator for TypeScript using generators (yield*). Zero dependencies, type-safe error handling.",
   "type": "module",
   "main": "./dist/index.js",
