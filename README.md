@@ -255,6 +255,46 @@ export async function handleOrderCheckout(orderId: string) {
 
 ---
 
+## 🚦 Guidelines & Anti-Patterns: Async/Await + Generator Boundaries
+
+Combining `async/await` with generator delegation (`yield* await asyncFn()`) is a powerful pattern, but mixing two control-flow models requires adhering to key architectural guidelines to avoid performance pitfalls and concurrency bottlenecks.
+
+### 🔴 Anti-Pattern 1: Sequential Request Waterfalls
+
+Avoid unwrapping multiple independent async calls sequentially inside `safe.async`:
+
+```typescript
+// ❌ ANTI-PATTERN: Creates a sequential waterfall latency bottleneck!
+const user = yield* await fetchUser(id);     // Waits 100ms
+const config = yield* await fetchConfig(id); // Waits 100ms (Total: 200ms)
+```
+
+**✅ Recommended Pattern (Parallel Concurrency):**
+Execute independent Promises concurrently with `Promise.all` before unwrapping:
+
+```typescript
+// ✅ RECOMMENDED: Concurrently fetches in parallel (Total: 100ms)
+const [userRes, configRes] = await Promise.all([fetchUser(id), fetchConfig(id)]);
+const user = yield* userRes;
+const config = yield* configRes;
+```
+
+---
+
+### 🔴 Anti-Pattern 2: Missing `await` on Async Result Promises
+
+Forgetting `await` before yielding an async function that returns `Promise<Result<T, E>>`:
+
+```typescript
+// ❌ ANTI-PATTERN: Forgetting 'await' on Promise<Result>
+const user = yield* fetchUserAsync(id); // Error: Trying to iterate over a Promise object!
+```
+
+**✅ Recommended Pattern:**
+Always use `yield* await fetchUserAsync(id)` when calling functions that return a `Promise<Result<T, E>>`.
+
+---
+
 ## 🛡️ Built-in Safety Features
 
 
